@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<title>발표 평가</title>
+<link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root {
+  --bg: #f4f5f7; --card: #ffffff; --ink: #1c1f24; --sub: #5f6670; --line: #e3e6ea;
+  --accent: #2f5bea; --accent-ink: #ffffff; --accent-soft: #e8eefe;
+  --ok: #1d8a4e; --ok-soft: #e4f4ea; --warn: #b4560b; --warn-soft: #fcefe2; --muted: #9aa1aa;
+  --bar: #2f5bea;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14161a; --card: #1d2026; --ink: #eceef1; --sub: #a3a9b2; --line: #30343c;
+    --accent: #6d8dff; --accent-ink: #0d1020; --accent-soft: #232b45;
+    --ok: #5fcf8d; --ok-soft: #1d3327; --warn: #f0a35e; --warn-soft: #3a2a1b; --muted: #6e757e;
+    --bar: #6d8dff;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); }
+body { font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif; -webkit-text-size-adjust: 100%; }
+.wrap { max-width: 720px; margin: 0 auto; padding: 20px 16px 60px; }
+.wrap.wide { max-width: 1040px; }
+h1 { font-size: 22px; margin: 4px 0 2px; letter-spacing: -0.02em; }
+h2 { font-size: 15px; color: var(--sub); margin: 28px 0 10px; font-weight: 600; }
+.top { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.who { color: var(--sub); font-size: 14px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+.stack > * + * { margin-top: 10px; }
+label.f { display: block; font-size: 14px; color: var(--sub); margin: 14px 0 6px; }
+select, input[type=password], input[type=text], input[type=tel], textarea {
+  width: 100%; font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line);
+  border-radius: 10px; padding: 12px; outline: none;
+}
+select:focus, input:focus, textarea:focus { border-color: var(--accent); }
+textarea { min-height: 76px; resize: vertical; }
+button { font: inherit; cursor: pointer; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--ink); padding: 10px 14px; }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+button.link { border: 0; background: none; color: var(--accent); padding: 6px 0; }
+button:disabled { opacity: .5; cursor: default; }
+.full { width: 100%; padding: 13px; margin-top: 18px; }
+.check { display: flex; align-items: center; gap: 8px; margin-top: 14px; color: var(--sub); font-size: 14px; }
+.err { color: var(--warn); font-size: 14px; margin-top: 12px; min-height: 1em; }
+.tabs { display: flex; gap: 6px; margin: 18px 0 4px; overflow-x: auto; }
+.tabs button { border-radius: 999px; padding: 8px 14px; font-size: 14px; white-space: nowrap; }
+.tabs button.on { background: var(--ink); color: var(--card); border-color: var(--ink); }
+.progress { margin-top: 14px; }
+.progress .bar { height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.progress .bar > i { display: block; height: 100%; background: var(--ok); }
+.progress .txt { font-size: 13px; color: var(--sub); margin-top: 6px; }
+.round { display: block; width: 100%; text-align: left; padding: 14px 16px; }
+.round .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.round .t { font-weight: 600; }
+.round .d { color: var(--sub); font-size: 14px; }
+.links { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.card-acts { margin-top: 10px; display: flex; justify-content: flex-end; }
+.editbtn { font-size: 14px; padding: 7px 14px; border-color: var(--accent); color: var(--accent); background: var(--card); font-weight: 600; }
+.editbtn.go { background: var(--accent); color: var(--accent-ink); }
+.team-card h3 { margin: 0; font-size: 17px; display: flex; align-items: center; gap: 8px; }
+.team-card .members { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.team-card .members span { font-size: 14px; padding: 4px 10px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); }
+.team-card .members span.leader { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); font-weight: 600; }
+.team-card .intro { margin-top: 12px; font-size: 15px; white-space: pre-wrap; }
+.team-card .intro.none { color: var(--muted); font-size: 14px; }
+.team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
+.round .memo { color: var(--sub); font-size: 13px; margin-top: 2px; }
+.badge { font-size: 12px; border-radius: 999px; padding: 3px 9px; white-space: nowrap; background: var(--bg); color: var(--sub); border: 1px solid var(--line); }
+.badge.todo { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
+.badge.done { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
+.badge.today { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+.today-card { border: 2px solid var(--accent); }
+.mycomment { font-size: 14px; color: var(--sub); margin-top: 6px; white-space: pre-wrap; }
+.editor { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 14px; }
+.scores { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.scores button { padding: 10px 0 8px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.scores button b { font-size: 20px; }
+.scores button span { font-size: 11px; color: var(--sub); }
+.scores button.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.scores button.on span { color: var(--accent-ink); }
+.editor .acts { display: flex; gap: 8px; margin-top: 12px; }
+.editor .acts .primary { flex: 1; }
+.count { text-align: right; font-size: 12px; color: var(--muted); margin-top: 4px; }
+.empty { color: var(--sub); font-size: 14px; padding: 6px 2px; }
+.fb .c { padding: 10px 12px; background: var(--bg); border-radius: 10px; white-space: pre-wrap; font-size: 15px; }
+.fb .c + .c { margin-top: 6px; }
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: var(--card); padding: 10px 18px; border-radius: 99px; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+.toast.show { opacity: 1; }
+.loading { color: var(--sub); padding: 40px 0; text-align: center; }
+.foot { margin-top: 40px; font-size: 12px; color: var(--muted); text-align: center; }
+/* 관리자 */
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 16px; }
+.tile .k { font-size: 13px; color: var(--sub); }
+.tile .v { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.tscroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+th, td { padding: 9px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { color: var(--sub); font-weight: 600; font-size: 13px; white-space: nowrap; }
+td.n, th.n { text-align: right; white-space: nowrap; }
+tr.lead td { font-weight: 700; }
+.mini { display: inline-flex; gap: 3px; flex-wrap: wrap; }
+.mini i { font-style: normal; font-size: 12px; padding: 1px 6px; border-radius: 6px; background: var(--bg); color: var(--sub); }
+.mini i.has { background: var(--accent-soft); color: var(--ink); }
+.dist { display: inline-flex; align-items: flex-end; gap: 2px; height: 22px; }
+.dist i { width: 9px; background: var(--bar); border-radius: 2px 2px 0 0; min-height: 1px; opacity: .85; }
+.names { color: var(--sub); font-size: 13px; }
+.bar-in { display: inline-block; height: 6px; border-radius: 9px; background: var(--ok); vertical-align: middle; }
+</style>
+</head>
+<body>
+<div id="app" class="wrap"><div class="loading">불러오는 중…</div></div>
+<div id="toast" class="toast"></div>
+
+<script>
+var BOOT = {"title":"발표 평가","api":"https://script.google.com/macros/s/AKfycbytxPrdskjwU2a53eenkWw9eHhnU5ar9GF4eFh5M6f-KcYupU5DmT8IeUuZt3pfRaap/exec"};
+var LABELS = ['', '매우 미흡', '미흡', '보통', '우수', '매우 우수'];
+var app = document.getElementById('app');
+var S = { names: [], me: null, cred: null, tab: 'score', open: null, showAll: false, draft: {} };
+var A = { data: null, tab: 'teams' };
+
+// 구글 주소에서 열면 google.script.run, 깃허브에서 열면 BOOT.api(구글 웹앱 주소)로 직접 요청한다
+function call(fn) {
+  var args = Array.prototype.slice.call(arguments, 1);
+  if (BOOT.api) {
+    return fetch(BOOT.api, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: fn, args: args }) })
+      .then(function (r) { return r.json(); })
+      .catch(function () { throw new Error('서버에 연결하지 못했습니다. 인터넷 연결을 확인하고 다시 해 주세요.'); })
+      .then(function (j) { if (!j.ok) throw new Error(j.error); return j.result; });
+  }
+  return new Promise(function (ok, no) {
+    var r = google.script.run.withSuccessHandler(ok).withFailureHandler(function (e) { no(e && e.message ? e : new Error(String(e))); });
+    r[fn].apply(r, args);
+  });
+}
+function store(kind) { try { return kind === 'local' ? window.localStorage : window.sessionStorage; } catch (e) { return null; } }
+function get(kind, k) { try { var s = store(kind); return s ? s.getItem(k) : null; } catch (e) { return null; } }
+function put(kind, k, v) { try { var s = store(kind); if (!s) return; if (v === null) s.removeItem(k); else s.setItem(k, v); } catch (e) {} }
+function esc(s) { return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function md(d) { var p = d.split('-'); return Number(p[1]) + '월 ' + Number(p[2]) + '일'; }
+function ymdK(d) { var p = d.split('-'); return p[0] + '.' + Number(p[1]) + '.' + Number(p[2]); }
+function f2(x) { return x === null || x === undefined ? '-' : (Math.round(x * 100) / 100).toFixed(2); }
+function toast(t) { var el = document.getElementById('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(function () { el.classList.remove('show'); }, 1800); }
+function errMsg(e) { var m = (e && e.message) || String(e); return m.replace(/^Exception:\s*/, '').replace(/^Error:\s*/, ''); }
+document.title = BOOT.title;
+
+/* ───────── 평가자 화면 ───────── */
+
+function startUser() {
+  call('apiInit').then(function (d) {
+    S.names = d.names.slice().sort(function (a, b) { return a.localeCompare(b, 'ko'); });
+    BOOT.title = d.title; document.title = d.title;
+    var saved = get('local', 'cred');
+    if (saved) {
+      try { S.cred = JSON.parse(saved); } catch (e) { S.cred = null; }
+    }
+    if (S.cred && S.names.indexOf(S.cred.name) >= 0) {
+      call('apiMe', S.cred.name, S.cred.pin).then(showMe)
+        .catch(function () { put('local', 'cred', null); S.cred = null; renderLogin(); });
+    } else renderLogin();
+  }).catch(function (e) { app.innerHTML = '<div class="loading">' + esc(errMsg(e)) + '</div>'; });
+}
+
+function renderLogin(msg) {
+  var last = S.cred ? S.cred.name : (get('local', 'lastName') || '');
+  app.innerHTML =
+    '<h1>' + esc(BOOT.title) + '</h1><div class="who">이름을 고르고 비밀번호(숫자 4자리)를 넣어 주세요.</div>' +
+    '<form class="card" id="login" style="margin-top:18px">' +
+    '<label class="f" for="nm" style="margin-top:0">이름</label>' +
+    '<select id="nm"><option value="">이름 선택</option>' +
+    S.names.map(function (n) { return '<option' + (n === last ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('') + '</select>' +
+    '<label class="f" for="pin">비밀번호</label>' +
+    '<input id="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" placeholder="••••">' +
+    '<label class="check"><input type="checkbox" id="keep" checked> 이 기기에서 다음에도 바로 들어오기</label>' +
+    '<button class="primary full" type="submit">들어가기</button>' +
+    '<div class="err" id="err">' + esc(msg || '') + '</div></form>';
+  document.getElementById('login').onsubmit = function (ev) {
+    ev.preventDefault();
+    var name = document.getElementById('nm').value, pin = document.getElementById('pin').value.trim();
+    var btn = ev.target.querySelector('button'); btn.disabled = true;
+    call('apiMe', name, pin).then(function (me) {
+      S.cred = { name: name, pin: pin };
+      put('local', 'lastName', name);
+      put('local', 'cred', document.getElementById('keep').checked ? JSON.stringify(S.cred) : null);
+      showMe(me);
+    }).catch(function (e) { btn.disabled = false; document.getElementById('err').textContent = errMsg(e); });
+  };
+}
+
+// 관리자 이름으로 들어오면 집계 화면, 아니면 평가 화면
+function showMe(me) {
+  if (me.admin) { S.me = null; A.data = me.summary; A.teams = me.teams; app.classList.add('wide'); renderAdmin(); }
+  else { S.me = me; app.classList.remove('wide'); renderUser(); }
+}
+function logout() { put('local', 'cred', null); S.me = null; S.cred = null; S.open = null; A.data = null; app.classList.remove('wide'); renderLogin(); }
+
+function renderUser() {
+  var me = S.me, R = me.rounds;
+  var open = R.filter(function (r) { return r.state !== 'future' && !r.own; });
+  var done = open.filter(function (r) { return r.score; });
+  var todo = open.filter(function (r) { return !r.score && r.state !== 'today'; }).reverse();
+  var today = R.filter(function (r) { return r.state === 'today'; })[0];
+  var scored = done.filter(function (r) { return !today || r.round !== today.round; }).reverse();
+  var future = R.filter(function (r) { return r.state === 'future'; });
+  var pct = open.length ? Math.round(done.length / open.length * 100) : 0;
+
+  var h = '<div class="top"><div><h1>' + esc(BOOT.title) + '</h1><div class="who">' + esc(me.name) + ' 님' + (me.teamName ? ' · ' + esc(me.teamName) : '') + '</div></div>' +
+    '<div class="links"><button class="link" id="pinbtn">비밀번호 변경</button><button class="link" id="out">다른 이름 로그인</button></div></div>';
+  h += '<div class="progress"><div class="bar"><i style="width:' + pct + '%"></i></div><div class="txt">지금까지 열린 발표 ' + open.length + '회 중 ' + done.length + '회 평가</div></div>';
+
+  var tabs = [['score', '평가하기'], ['teams', '조 소개']];
+  if (me.team) tabs.push(['fb', '우리 조가 받은 의견']);
+  h += '<div class="tabs">' + tabs.map(function (t) { return '<button data-tab="' + t[0] + '" class="' + (S.tab === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') + '</div>';
+
+  if (S.tab === 'teams') {
+    h += teamsHtml(me.teams, me.team, true);
+  } else if (S.tab === 'fb' && me.team) {
+    h += '<h2>' + esc(me.teamName) + ' 발표에 남긴 의견 (누가 썼는지는 보이지 않습니다)</h2>';
+    if (!me.feedback.length) h += '<div class="empty">아직 받은 의견이 없습니다.</div>';
+    me.feedback.forEach(function (f) {
+      h += '<div class="card fb stack" style="margin-bottom:10px"><div class="d" style="color:var(--sub);font-size:14px">' + f.round + '회차 · ' + md(f.date) + '(' + f.day + ')' + (f.product ? ' · ' + esc(f.product) : '') + '</div>' +
+        f.comments.map(function (c) { return '<div class="c">' + esc(c) + '</div>'; }).join('') + '</div>';
+    });
+  } else {
+    if (today) {
+      h += '<h2>오늘의 발표</h2>' + roundCard(today, true);
+    }
+    h += '<h2>평가할 발표' + (todo.length ? ' (' + todo.length + ')' : '') + '</h2>';
+    h += todo.length ? '<div class="stack">' + todo.map(function (r) { return roundCard(r); }).join('') + '</div>'
+      : '<div class="empty">' + (open.length ? '밀린 평가가 없습니다.' : '첫 발표는 ' + (future[0] ? ymdK(future[0].date) + '(' + future[0].day + ')' : '') + '입니다. 아래 다가오는 발표에서 미리 평가할 수도 있습니다.') + '</div>';
+    if (scored.length) h += '<h2>평가한 발표 (' + scored.length + ') · [점수·의견 수정] 버튼으로 고칠 수 있습니다</h2><div class="stack">' + scored.map(function (r) { return roundCard(r); }).join('') + '</div>';
+    var list = S.showAll ? R : future.slice(0, 3);
+    h += '<h2>' + (S.showAll ? '전체 일정 (' + R.length + '회)' : '다가오는 발표') + '</h2>';
+    h += list.length ? '<div class="stack">' + list.map(function (r) { return roundCard(r); }).join('') + '</div>' : '<div class="empty">남은 발표가 없습니다.</div>';
+    h += '<button class="link" id="all">' + (S.showAll ? '다가오는 발표만 보기' : '전체 일정 보기') + '</button>';
+  }
+  h += '<div class="foot">점수와 의견은 언제든 고칠 수 있습니다. 점수 집계는 관리자만 봅니다.</div>';
+  app.innerHTML = h;
+  bindUser();
+}
+
+// canEdit: 평가자 화면에서 우리 조 카드에 [소개 수정]을 붙인다
+function teamsHtml(teams, myTeam, canEdit) {
+  if (!teams || !teams.length) return '<div class="empty">조 정보가 없습니다.</div>';
+  return '<h2>조마다 이름, 조원, 소개 글' + (canEdit && myTeam ? ' · 우리 조 소개는 조원 누구나 고칠 수 있습니다' : '') + '</h2><div class="team-grid">' + teams.map(function (t) {
+    var mine = myTeam === t.team;
+    var h = '<div class="card team-card"><h3>' + esc(t.name) + (mine ? ' <span class="badge today">우리 조</span>' : '') + '</h3>' +
+      '<div class="members">' + (t.members.length ? t.members.map(function (m) { return m === t.leader ? '<span class="leader">' + esc(m) + '</span>' : '<span>' + esc(m) + '</span>'; }).join('') : '<span>조원 없음</span>') + '</div>';
+    if (mine && canEdit && S.introEdit) {
+      return h + '<textarea id="introtx" maxlength="1000" style="margin-top:12px;min-height:120px" placeholder="우리 조를 소개해 주세요">' + esc(t.intro) + '</textarea>' +
+        '<div class="count" id="introcnt">' + t.intro.length + ' / 1000</div>' +
+        '<div class="acts" style="display:flex;gap:8px;margin-top:8px"><button type="button" id="introcancel">취소</button><button type="button" class="primary" id="introsave" style="flex:1">소개 저장</button></div>' +
+        '<div class="err" id="introerr"></div></div>';
+    }
+    h += t.intro ? '<div class="intro">' + esc(t.intro) + '</div>' : '<div class="intro none">소개 글이 아직 없습니다.</div>';
+    if (t.introBy) h += '<div class="count" style="text-align:left;margin-top:8px">마지막 수정: ' + esc(t.introBy) + '</div>';
+    if (mine && canEdit) h += '<div class="card-acts"><button type="button" class="editbtn" id="introedit">' + (t.intro ? '소개 수정' : '소개 쓰기') + '</button></div>';
+    return h + '</div>';
+  }).join('') + '</div>';
+}
+
+function bindIntro() {
+  var ie = document.getElementById('introedit');
+  if (ie) ie.onclick = function () { S.introEdit = true; renderUser(); var t = document.getElementById('introtx'); if (t) t.focus(); };
+  var tx = document.getElementById('introtx');
+  if (!tx) return;
+  tx.oninput = function () { document.getElementById('introcnt').textContent = tx.value.length + ' / 1000'; };
+  document.getElementById('introcancel').onclick = function () { S.introEdit = false; renderUser(); };
+  document.getElementById('introsave').onclick = function () {
+    var b = this; b.disabled = true; b.textContent = '저장 중…';
+    call('apiSaveIntro', S.cred.name, S.cred.pin, tx.value).then(function (teams) {
+      S.me.teams = teams; S.introEdit = false; renderUser(); toast('조 소개를 저장했습니다');
+    }).catch(function (e) { b.disabled = false; b.textContent = '다시 저장'; document.getElementById('introerr').textContent = errMsg(e); });
+  };
+}
+
+function roundCard(r, isToday) {
+  var badge;
+  if (r.own) badge = '<span class="badge">우리 조 발표</span>';
+  else if (r.score) badge = '<span class="badge done">' + r.score + '점 · ' + LABELS[r.score] + '</span>';
+  else if (r.state === 'future') badge = '<span class="badge">예정</span>';
+  else if (r.state === 'today') badge = '<span class="badge today">오늘 평가하기</span>';
+  else badge = '<span class="badge todo">아직 안 함</span>';
+  var canEdit = !r.own;
+  var isOpen = S.open === r.round && canEdit;
+  var h = '<div class="card round' + (isToday ? ' today-card' : '') + '"' + (canEdit && !isOpen ? ' role="button" tabindex="0" data-open="' + r.round + '" style="cursor:pointer"' : '') + '>' +
+    '<div class="row"><div><div class="t">' + esc(r.teamName) + (r.product ? ' · ' + esc(r.product) : ' 발표') + '</div><div class="d">' + r.round + '회차 · ' + ymdK(r.date) + '(' + r.day + ')</div>' +
+    (r.memo ? '<div class="memo">' + esc(r.memo) + '</div>' : '') + '</div>' + badge + '</div>';
+  if (r.comment && !isOpen) h += '<div class="mycomment">내 의견: ' + esc(r.comment) + '</div>';
+  if (canEdit && !isOpen) h += '<div class="card-acts"><button type="button" class="' + (r.score ? 'editbtn' : 'editbtn go') + '" data-open="' + r.round + '">' + (r.score ? '점수·의견 수정' : '평가하기') + '</button></div>';
+  if (isOpen) {
+    var d = S.draft[r.round] || { score: r.score, comment: r.comment || '' };
+    S.draft[r.round] = d;
+    h += '<div class="editor"><div class="scores">' + [1, 2, 3, 4, 5].map(function (n) {
+      return '<button type="button" data-score="' + n + '" class="' + (d.score === n ? 'on' : '') + '"><b>' + n + '</b><span>' + LABELS[n] + '</span></button>';
+    }).join('') + '</div>' +
+      '<label class="f" for="cm">한 줄 의견 (선택) · 관리자와 ' + esc(r.teamName) + '만 봅니다</label>' +
+      '<textarea id="cm" maxlength="' + S.me.commentMax + '" placeholder="좋았던 점, 아쉬운 점">' + esc(d.comment) + '</textarea>' +
+      '<div class="count" id="cnt">' + d.comment.length + ' / ' + S.me.commentMax + '</div>' +
+      '<div class="acts"><button type="button" id="cancel">닫기</button><button type="button" class="primary" id="save"' + (d.score ? '' : ' disabled') + '>' + (r.score ? '고쳐서 저장' : '저장') + '</button></div>' +
+      '<div class="err" id="serr"></div></div>';
+  }
+  return h + '</div>';
+}
+
+function bindUser() {
+  document.getElementById('out').onclick = logout;
+  document.getElementById('pinbtn').onclick = function () { renderPin(renderUser); };
+  Array.prototype.forEach.call(app.querySelectorAll('[data-tab]'), function (b) { b.onclick = function () { S.tab = b.getAttribute('data-tab'); S.open = null; S.introEdit = false; renderUser(); }; });
+  var all = document.getElementById('all'); if (all) all.onclick = function () { S.showAll = !S.showAll; renderUser(); };
+  bindIntro();
+  Array.prototype.forEach.call(app.querySelectorAll('[data-open]'), function (el) {
+    var go = function () { S.open = Number(el.getAttribute('data-open')); delete S.draft[S.open]; renderUser(); var c = app.querySelector('.editor'); if (c) c.parentNode.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); };
+    el.onclick = function (e) { e.stopPropagation(); go(); };
+    el.onkeydown = function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } };
+  });
+  var ed = app.querySelector('.editor');
+  if (!ed) return;
+  var d = S.draft[S.open];
+  Array.prototype.forEach.call(ed.querySelectorAll('[data-score]'), function (b) {
+    b.onclick = function () {
+      d.score = Number(b.getAttribute('data-score'));
+      Array.prototype.forEach.call(ed.querySelectorAll('[data-score]'), function (x) { x.classList.toggle('on', x === b); });
+      document.getElementById('save').disabled = false;
+    };
+  });
+  var cm = document.getElementById('cm');
+  cm.oninput = function () { d.comment = cm.value; document.getElementById('cnt').textContent = cm.value.length + ' / ' + S.me.commentMax; };
+  document.getElementById('cancel').onclick = function () { delete S.draft[S.open]; S.open = null; renderUser(); };
+  document.getElementById('save').onclick = function () {
+    var btn = this; btn.disabled = true; btn.textContent = '저장 중…';
+    call('apiSave', S.cred.name, S.cred.pin, S.open, d.score, d.comment).then(function (me) {
+      delete S.draft[S.open]; S.open = null; S.me = me; renderUser(); toast('저장했습니다');
+    }).catch(function (e) { btn.disabled = false; btn.textContent = '다시 저장'; document.getElementById('serr').textContent = errMsg(e); });
+  };
+}
+
+/* ───────── 비밀번호 변경 ───────── */
+
+function renderPin(back) {
+  app.innerHTML = '<h1>비밀번호 변경</h1><div class="who">' + esc(S.cred.name) + ' 님 · 다음부터 새 비밀번호로 들어옵니다.</div>' +
+    '<form class="card" id="pf" style="margin-top:18px;max-width:420px">' +
+    '<label class="f" for="p0" style="margin-top:0">현재 비밀번호</label><input id="p0" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off">' +
+    '<label class="f" for="p1">새 비밀번호 (숫자 4자리)</label><input id="p1" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off">' +
+    '<label class="f" for="p2">새 비밀번호 확인</label><input id="p2" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off">' +
+    '<div class="acts" style="display:flex;gap:8px;margin-top:18px"><button type="button" id="pback">취소</button><button class="primary" type="submit" style="flex:1">바꾸기</button></div>' +
+    '<div class="err" id="perr"></div></form>';
+  document.getElementById('pback').onclick = back;
+  document.getElementById('pf').onsubmit = function (ev) {
+    ev.preventDefault();
+    var p0 = document.getElementById('p0').value.trim(), p1 = document.getElementById('p1').value.trim(), p2 = document.getElementById('p2').value.trim();
+    var err = document.getElementById('perr');
+    if (!/^\d{4,8}$/.test(p1)) { err.textContent = '새 비밀번호는 숫자 4자리로 넣어 주세요.'; return; }
+    if (p1 !== p2) { err.textContent = '새 비밀번호와 확인이 서로 다릅니다.'; return; }
+    var btn = ev.target.querySelector('button[type=submit]'); btn.disabled = true; btn.textContent = '바꾸는 중…';
+    call('apiChangePin', S.cred.name, p0, p1).then(function () {
+      S.cred.pin = p1;
+      if (get('local', 'cred')) put('local', 'cred', JSON.stringify(S.cred));
+      back(); toast('비밀번호를 변경했습니다');
+    }).catch(function (e) { btn.disabled = false; btn.textContent = '바꾸기'; err.textContent = errMsg(e); });
+  };
+}
+
+/* ───────── 관리자 화면 ───────── */
+
+function renderAdmin() {
+  var d = A.data;
+  var held = d.rounds.filter(function (r) { return r.state !== 'future'; });
+  var next = d.rounds.filter(function (r) { return r.state === 'future'; })[0];
+  var h = '<div class="top"><div><h1>' + esc(BOOT.title) + ' · 집계</h1><div class="who">' + ymdK(d.today) + ' 기준 · 관리자만 볼 수 있는 화면</div></div>' +
+    '<div class="links"><button id="reload">새로고침</button><button class="link" id="apin">비밀번호 변경</button><button class="link" id="aout">다른 이름 로그인</button></div></div>';
+  h += '<div class="tiles">' +
+    tile('진행한 발표', held.length + ' / ' + d.rounds.length + '회') +
+    tile('다음 발표', next ? md(next.date) + ' ' + esc(next.teamName) + (next.product ? '<div class="k" style="margin-top:2px">' + esc(next.product) + '</div>' : '') : '없음') +
+    tile('받은 점수', d.totalScores + '건') +
+    tile('평가자', d.peopleCount + '명') + '</div>';
+  var tabs = [['teams', '조별 순위'], ['rounds', '회차별'], ['people', '평가자 참여'], ['comments', '의견 (' + d.comments.length + ')'], ['intro', '조 소개']];
+  h += '<div class="tabs">' + tabs.map(function (t) { return '<button data-atab="' + t[0] + '" class="' + (A.tab === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') + '</div>';
+
+  if (A.tab === 'teams') {
+    var teams = d.teams.slice().sort(function (a, b) { return (a.rank || 99) - (b.rank || 99) || a.team - b.team; });
+    h += '<h2>평균 = 각 회차 평균점의 평균 · 총점 = 받은 점수를 모두 더한 값</h2><div class="card tscroll"><table><thead><tr><th>순위</th><th>조</th><th class="n">평균</th><th class="n">총점</th><th class="n">점수 수</th><th class="n">발표</th><th>회차별 평균</th></tr></thead><tbody>' +
+      teams.map(function (t) {
+        return '<tr class="' + (t.rank === 1 ? 'lead' : '') + '"><td>' + (t.rank || '-') + '</td><td style="white-space:nowrap">' + esc(t.teamName) + '</td><td class="n">' + f2(t.avg) + '</td><td class="n">' + t.sum + '</td><td class="n">' + t.count + '</td><td class="n">' + t.held + '/' + t.planned + '</td><td><span class="mini">' +
+          t.rounds.map(function (r) { return '<i class="' + (r.avg !== null ? 'has' : '') + '" title="' + r.round + '회차 ' + r.date + (r.product ? ' ' + esc(r.product) : '') + '">' + (r.avg !== null ? f2(r.avg) : md(r.date)) + '</i>'; }).join('') + '</span></td></tr>';
+      }).join('') + '</tbody></table></div>';
+  } else if (A.tab === 'rounds') {
+    var list = held.slice().reverse();
+    h += '<h2>지난 발표 ' + list.length + '회 (최근 순)</h2>';
+    h += list.length ? '<div class="card tscroll"><table><thead><tr><th class="n">회차</th><th>날짜</th><th>조</th><th>제품</th><th class="n">평균</th><th class="n">최저~최고</th><th class="n">평가</th><th>1~5점 분포</th><th>미평가자</th></tr></thead><tbody>' +
+      list.map(function (r) {
+        var mx = Math.max.apply(null, r.dist.concat([1]));
+        return '<tr><td class="n">' + r.round + '</td><td style="white-space:nowrap">' + ymdK(r.date) + '(' + r.day + ')</td><td style="white-space:nowrap">' + esc(r.teamName) + '</td><td style="white-space:nowrap">' + esc(r.product || '-') + '</td><td class="n">' + f2(r.avg) + '</td><td class="n">' + (r.count ? r.min + '~' + r.max : '-') + '</td><td class="n">' + r.count + '/' + r.eligible + '</td>' +
+          '<td><span class="dist" title="' + r.dist.map(function (c, i) { return (i + 1) + '점 ' + c + '명'; }).join(', ') + '">' + r.dist.map(function (c) { return '<i style="height:' + Math.max(4, c / mx * 100) + '%;' + (c ? '' : 'opacity:.2') + '"></i>'; }).join('') + '</span></td>' +
+          '<td class="names">' + (r.missing.length ? esc(r.missing.join(', ')) : '모두 평가') + '</td></tr>';
+      }).join('') + '</tbody></table></div>' : '<div class="empty">아직 지난 발표가 없습니다. 첫 발표: ' + (next ? ymdK(next.date) : '') + '</div>';
+  } else if (A.tab === 'people') {
+    var ppl = d.evaluators.slice().sort(function (a, b) { return (a.done / (a.need || 1)) - (b.done / (b.need || 1)) || (a.name < b.name ? -1 : 1); });
+    h += '<h2>평가 참여 (적게 한 사람부터)</h2><div class="card tscroll"><table><thead><tr><th>이름</th><th>조</th><th class="n">평가</th><th>빠진 회차</th></tr></thead><tbody>' +
+      ppl.map(function (p) {
+        var w = p.need ? Math.round(p.done / p.need * 60) : 0;
+        return '<tr><td>' + esc(p.name) + '</td><td>' + esc(p.teamName || '-') + '</td><td class="n"><span class="bar-in" style="width:' + w + 'px"></span> ' + p.done + '/' + p.need + '</td><td class="names">' + (p.missing.length ? p.missing.map(function (n) { return n + '회'; }).join(', ') : (p.need ? '없음' : '-')) + '</td></tr>';
+      }).join('') + '</tbody></table></div>';
+  } else if (A.tab === 'intro') {
+    h += teamsHtml(A.teams) + '<div class="foot" style="margin-top:14px;text-align:left">소개 글은 구글 시트 [조] 탭 C열 "조 소개"에 쓰면 여기와 평가자 화면에 나옵니다. 조원은 [평가자] 탭의 조 번호로 정해집니다.</div>';
+  } else {
+    h += '<h2>의견 전체 (관리자에게만 이름이 보입니다)</h2>';
+    h += d.comments.length ? '<div class="card tscroll"><table><thead><tr><th class="n">회차</th><th>발표조</th><th>제품</th><th>평가자</th><th class="n">점수</th><th>의견</th></tr></thead><tbody>' +
+      d.comments.map(function (c) { return '<tr><td class="n">' + c.round + '</td><td style="white-space:nowrap">' + esc(c.teamName) + '</td><td style="white-space:nowrap">' + esc(c.product || '-') + '</td><td style="white-space:nowrap">' + esc(c.name) + '</td><td class="n">' + c.score + '</td><td>' + esc(c.comment) + '</td></tr>'; }).join('') + '</tbody></table></div>'
+      : '<div class="empty">아직 의견이 없습니다.</div>';
+  }
+  h += '<div class="foot">같은 집계가 구글 시트 [집계] 탭에도 저장됩니다.</div>';
+  app.innerHTML = h;
+  Array.prototype.forEach.call(app.querySelectorAll('[data-atab]'), function (b) { b.onclick = function () { A.tab = b.getAttribute('data-atab'); renderAdmin(); }; });
+  document.getElementById('reload').onclick = function () {
+    var b = this; b.disabled = true; b.textContent = '불러오는 중…';
+    call('apiMe', S.cred.name, S.cred.pin).then(showMe).catch(function (e) { b.disabled = false; b.textContent = '새로고침'; toast(errMsg(e)); });
+  };
+  document.getElementById('aout').onclick = logout;
+  document.getElementById('apin').onclick = function () { renderPin(renderAdmin); };
+}
+function tile(k, v) { return '<div class="card tile"><div class="k">' + k + '</div><div class="v">' + v + '</div></div>'; }
+
+startUser();
+</script>
+</body>
+</html>
