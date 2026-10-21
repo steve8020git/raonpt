@@ -57,6 +57,17 @@ button:disabled { opacity: .5; cursor: default; }
 .round .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .round .t { font-weight: 600; }
 .round .d { color: var(--sub); font-size: 14px; }
+/* 로그인 첫 화면: 로고, 배너, 회사 정보 */
+.login-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.login-head .logo { width: 96px; height: auto; flex: none; background: #fff; border-radius: 8px; padding: 6px 8px; }
+.brand { margin-top: 22px; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); }
+.brand img { display: block; width: 100%; height: auto; }
+.corp { background: #222326; color: #a9adb3; font-size: 13px; line-height: 1.7; padding: 16px 18px 14px; }
+.corp p { margin: 0; }
+.corp b { color: #e6e8eb; font-weight: 600; margin-right: 4px; }
+.corp .it { display: inline-block; margin-right: 18px; white-space: nowrap; }
+.corp .copy { margin-top: 10px; color: #7d828a; font-size: 12px; }
+@media (max-width: 480px) { .login-head .logo { width: 72px; } .corp { font-size: 12px; } }
 .links { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
 .card-acts { margin-top: 10px; display: flex; justify-content: flex-end; }
 .editbtn { font-size: 14px; padding: 7px 14px; border-color: var(--accent); color: var(--accent); background: var(--card); font-weight: 600; }
@@ -166,8 +177,10 @@ function startUser() {
 
 function renderLogin(msg) {
   var last = S.cred ? S.cred.name : (get('local', 'lastName') || '');
+  var A0 = BOOT.assets || '';
   app.innerHTML =
-    '<h1>' + esc(BOOT.title) + '</h1><div class="who">이름을 고르고 비밀번호(숫자 4자리)를 넣어 주세요.</div>' +
+    '<div class="login-head"><div><h1>' + esc(BOOT.title) + '</h1><div class="who">이름을 고르고 비밀번호(숫자 4자리)를 넣어 주세요.</div></div>' +
+    '<img class="logo" src="' + A0 + 'logo.png" alt="RAONSECURE"></div>' +
     '<form class="card" id="login" style="margin-top:18px">' +
     '<label class="f" for="nm" style="margin-top:0">이름</label>' +
     '<select id="nm"><option value="">이름 선택</option>' +
@@ -176,7 +189,12 @@ function renderLogin(msg) {
     '<input id="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" placeholder="••••">' +
     '<label class="check"><input type="checkbox" id="keep" checked> 이 기기에서 다음에도 바로 들어오기</label>' +
     '<button class="primary full" type="submit">들어가기</button>' +
-    '<div class="err" id="err">' + esc(msg || '') + '</div></form>';
+    '<div class="err" id="err">' + esc(msg || '') + '</div></form>' +
+    '<div class="brand"><img src="' + A0 + 'banner.webp" alt="AI는 지능을 만들고, Web3는 신뢰를 만듭니다 — Agentic AI Platform ONE AI, Web3 Platform OmniOne">' +
+    '<div class="corp"><p><span class="it"><b>대표이사</b> 이순형·이정아</span><span class="it"><b>사업자등록번호</b> 138-81-16484</span>' +
+    '<span class="it"><b>대표전화</b> 02-561-4545</span><span class="it"><b>FAX</b> 02-565-5350</span></p>' +
+    '<p><b>본사</b> 서울특별시 영등포구 여의대로 108, 파크원타워2 47-48(여의도동)</p>' +
+    '<p class="copy">© RaonSecure. All rights reserved.</p></div></div>';
   document.getElementById('login').onsubmit = function (ev) {
     ev.preventDefault();
     var name = document.getElementById('nm').value, pin = document.getElementById('pin').value.trim();
