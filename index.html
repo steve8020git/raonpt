@@ -99,6 +99,9 @@ button:disabled { opacity: .5; cursor: default; }
 .scores button.on span { color: var(--accent-ink); }
 .editor .acts { display: flex; gap: 8px; margin-top: 12px; }
 .editor .acts .primary { flex: 1; }
+.del-row { margin-top: 12px; text-align: center; }
+.del { border: 0; background: none; color: var(--warn); font-size: 14px; padding: 6px 4px; text-decoration: underline; text-underline-offset: 3px; }
+.del.sure { color: #fff; background: #c2410c; text-decoration: none; border-radius: 8px; padding: 8px 14px; font-weight: 600; }
 .count { text-align: right; font-size: 12px; color: var(--muted); margin-top: 4px; }
 .empty { color: var(--sub); font-size: 14px; padding: 6px 2px; }
 .fb .c { padding: 10px 12px; background: var(--bg); border-radius: 10px; white-space: pre-wrap; font-size: 15px; }
@@ -343,6 +346,7 @@ function roundCard(r, isToday) {
       '<textarea id="cm" maxlength="' + S.me.commentMax + '" placeholder="좋았던 점, 아쉬운 점">' + esc(d.comment) + '</textarea>' +
       '<div class="count" id="cnt">' + d.comment.length + ' / ' + S.me.commentMax + '</div>' +
       '<div class="acts"><button type="button" id="cancel">닫기</button><button type="button" class="primary" id="save"' + (d.score ? '' : ' disabled') + '>' + (r.score ? '고쳐서 저장' : '저장') + '</button></div>' +
+      (r.score ? '<div class="del-row"><button type="button" class="del" id="del">입력 취소 · 이 발표에 넣은 점수와 의견 지우기</button></div>' : '') +
       '<div class="err" id="serr"></div></div>';
   }
   return h + '</div>';
@@ -377,6 +381,19 @@ function bindUser() {
     call('apiSave', S.cred.name, S.cred.pin, S.open, d.score, d.comment).then(function (me) {
       delete S.draft[S.open]; S.open = null; S.me = me; renderUser(); toast('저장했습니다');
     }).catch(function (e) { btn.disabled = false; btn.textContent = '다시 저장'; document.getElementById('serr').textContent = errMsg(e); });
+  };
+  // 입력 취소: 실수로 누르지 않게 한 번 더 눌러야 지운다
+  var del = document.getElementById('del');
+  if (del) del.onclick = function () {
+    if (!del.classList.contains('sure')) {
+      del.classList.add('sure'); del.textContent = '정말 지울까요? 한 번 더 누르면 지워집니다';
+      setTimeout(function () { if (del.isConnected && !del.disabled) { del.classList.remove('sure'); del.textContent = '입력 취소 · 이 발표에 넣은 점수와 의견 지우기'; } }, 4000);
+      return;
+    }
+    del.disabled = true; del.textContent = '지우는 중…';
+    call('apiDelete', S.cred.name, S.cred.pin, S.open).then(function (me) {
+      delete S.draft[S.open]; S.open = null; S.me = me; renderUser(); toast('입력을 취소했습니다');
+    }).catch(function (e) { del.disabled = false; del.classList.remove('sure'); del.textContent = '입력 취소 · 이 발표에 넣은 점수와 의견 지우기'; document.getElementById('serr').textContent = errMsg(e); });
   };
 }
 
