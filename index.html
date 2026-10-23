@@ -436,7 +436,7 @@ function renderAdmin() {
     tile('다음 발표', next ? md(next.date) + ' ' + esc(next.teamName) + (next.product ? '<div class="k" style="margin-top:2px">' + esc(next.product) + '</div>' : '') : '없음') +
     tile('받은 점수', d.totalScores + '건') +
     tile('평가자', d.peopleCount + '명') + '</div>';
-  var tabs = [['teams', '조별 순위'], ['rounds', '회차별'], ['people', '평가자 참여'], ['comments', '의견 (' + d.comments.length + ')'], ['intro', '조 소개']];
+  var tabs = [['teams', '조별 순위'], ['rounds', '회차별'], ['people', '평가자 참여'], ['comments', '의견 (' + d.comments.length + ')'], ['intro', '조 소개'], ['member', '멤버 추가']];
   h += '<div class="tabs">' + tabs.map(function (t) { return '<button data-atab="' + t[0] + '" class="' + (A.tab === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') + '</div>';
 
   if (A.tab === 'teams') {
@@ -463,6 +463,8 @@ function renderAdmin() {
         var w = p.need ? Math.round(p.done / p.need * 60) : 0;
         return '<tr><td>' + esc(p.name) + '</td><td>' + esc(p.teamName || '-') + '</td><td class="n"><span class="bar-in" style="width:' + w + 'px"></span> ' + p.done + '/' + p.need + '</td><td class="names">' + (p.missing.length ? p.missing.map(function (n) { return n + '회'; }).join(', ') : (p.need ? '없음' : '-')) + '</td></tr>';
       }).join('') + '</tbody></table></div>';
+  } else if (A.tab === 'member') {
+    h += memberHtml();
   } else if (A.tab === 'intro') {
     h += teamsHtml(A.teams) + '<div class="foot" style="margin-top:14px;text-align:left">소개 글은 구글 시트 [조] 탭 C열 "조 소개"에 쓰면 여기와 평가자 화면에 나옵니다. 조원은 [평가자] 탭의 조 번호로 정해집니다.</div>';
   } else {
@@ -480,6 +482,44 @@ function renderAdmin() {
   };
   document.getElementById('aout').onclick = logout;
   document.getElementById('apin').onclick = function () { renderPin(renderAdmin); };
+  bindMember();
+}
+
+// 관리자 [멤버 추가]: 조를 고르면 그 조 조원, "조 없음"이면 모든 조를 평가하는 평가자
+function memberHtml() {
+  var teams = A.teams || [];
+  var h = '<h2>새 멤버를 명단([평가자] 탭)에 넣습니다</h2><form class="card" id="mf" style="max-width:460px">' +
+    '<label class="f" for="mname" style="margin-top:0">이름</label><input id="mname" type="text" maxlength="20" autocomplete="off" placeholder="예: 홍길동">' +
+    '<label class="f" for="mteam">조</label><select id="mteam"><option value="0">조 없음 · 모든 조 발표를 평가</option>' +
+    teams.map(function (t) { return '<option value="' + t.team + '">' + esc(t.name) + (t.members.length ? ' · ' + esc(t.members.join(', ')) : '') + '</option>'; }).join('') + '</select>' +
+    '<div class="count" style="text-align:left;margin-top:6px">조를 고르면 그 조 조원이 되어 조 소개에 나오고, 자기 조 발표는 평가하지 않습니다.</div>' +
+    '<label class="f" for="mpin">비밀번호 (숫자 4자리)</label><input id="mpin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" placeholder="비워 두면 자동으로 만듭니다">' +
+    '<button class="primary full" type="submit">멤버 추가</button><div class="err" id="merr"></div></form>';
+  if (A.lastAdded) {
+    var a = A.lastAdded;
+    h += '<div class="card" style="max-width:460px;margin-top:12px;border-color:var(--ok)"><b>' + esc(a.name) + '</b> 님을 ' + (a.team ? esc(a.teamName) + ' 조원으로' : '조 없는 평가자로') + ' 추가했습니다.' +
+      '<div style="margin-top:6px">비밀번호: <b style="font-size:18px;letter-spacing:2px">' + esc(a.pin) + '</b></div>' +
+      '<div class="count" style="text-align:left;margin-top:6px">이 비밀번호를 본인에게 따로 알려 주세요. 시트 [평가자] 탭에서도 볼 수 있습니다.</div></div>';
+  }
+  return h;
+}
+
+function bindMember() {
+  var f = document.getElementById('mf');
+  if (!f) return;
+  f.onsubmit = function (ev) {
+    ev.preventDefault();
+    var m = { name: document.getElementById('mname').value.trim(), team: Number(document.getElementById('mteam').value), pin: document.getElementById('mpin').value.trim() };
+    var err = document.getElementById('merr');
+    if (!m.name) { err.textContent = '이름을 넣어 주세요.'; return; }
+    if (m.pin && !/^\d{4,8}$/.test(m.pin)) { err.textContent = '비밀번호는 숫자 4자리로 넣어 주세요. 비워 두면 자동으로 만듭니다.'; return; }
+    var btn = f.querySelector('button[type=submit]'); btn.disabled = true; btn.textContent = '추가하는 중…';
+    call('apiAddMember', S.cred.name, S.cred.pin, m).then(function (r) {
+      A.data = r.summary; A.teams = r.teams; A.lastAdded = r.added;
+      if (S.names && S.names.indexOf(r.added.name) < 0) { S.names.push(r.added.name); S.names.sort(function (a, b) { return a.localeCompare(b, 'ko'); }); }
+      renderAdmin(); toast(r.added.name + ' 님을 추가했습니다');
+    }).catch(function (e) { btn.disabled = false; btn.textContent = '멤버 추가'; err.textContent = errMsg(e); });
+  };
 }
 function tile(k, v) { return '<div class="card tile"><div class="k">' + k + '</div><div class="v">' + v + '</div></div>'; }
 
