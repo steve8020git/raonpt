@@ -142,6 +142,8 @@ tr.given .mini b { color: var(--accent); margin-left: 2px; }
 
 <script>
 var BOOT = {"title":"발표 평가","api":"https://script.google.com/macros/s/AKfycbytxPrdskjwU2a53eenkWw9eHhnU5ar9GF4eFh5M6f-KcYupU5DmT8IeUuZt3pfRaap/exec"};
+// 화면 버전: Code.js 의 PAGE_VER 와 같아야 한다. 다르면(브라우저가 옛 화면을 기억) 한 번 새로 불러온다.
+var PAGE_VER = '2026-10-23b';
 var LABELS = ['', '매우 미흡', '미흡', '보통', '우수', '매우 우수'];
 var app = document.getElementById('app');
 var S = { names: [], me: null, cred: null, tab: 'score', open: null, showAll: false, draft: {} };
@@ -183,6 +185,12 @@ function startUser() {
   if (!S.cred) { S.names = null; renderLogin(); }
   call('apiInit').then(function (d) {
     S.names = d.names.slice().sort(function (a, b) { return a.localeCompare(b, 'ko'); });
+    if (BOOT.api && d.ver && d.ver !== PAGE_VER && get('session', 'reloadedFor') !== d.ver) {
+      put('session', 'reloadedFor', d.ver);
+      var u = location.href.replace(/([?&])v=[^&#]*/, '').replace(/[?&]$/, '');
+      location.replace(u + (u.indexOf('?') >= 0 ? '&' : '?') + 'v=' + encodeURIComponent(d.ver));
+      return;
+    }
     BOOT.title = d.title; document.title = d.title;
     if (S.cred && S.names.indexOf(S.cred.name) >= 0) {
       call('apiMe', S.cred.name, S.cred.pin).then(showMe)
