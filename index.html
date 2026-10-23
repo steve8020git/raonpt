@@ -123,6 +123,10 @@ tr.lead td { font-weight: 700; }
 .mini { display: inline-flex; gap: 3px; flex-wrap: wrap; }
 .mini i { font-style: normal; font-size: 12px; padding: 1px 6px; border-radius: 6px; background: var(--bg); color: var(--sub); }
 .mini i.has { background: var(--accent-soft); color: var(--ink); }
+tr.rrow td { border-bottom: 0; padding-bottom: 4px; }
+tr.given td { padding-top: 0; padding-bottom: 12px; }
+tr.given .mini i { font-size: 13px; padding: 2px 8px; }
+tr.given .mini b { color: var(--accent); margin-left: 2px; }
 .dist { display: inline-flex; align-items: flex-end; gap: 2px; height: 22px; }
 .dist i { width: 9px; background: var(--bar); border-radius: 2px 2px 0 0; min-height: 1px; opacity: .85; }
 .names { color: var(--sub); font-size: 13px; }
@@ -447,14 +451,19 @@ function renderAdmin() {
           t.rounds.map(function (r) { return '<i class="' + (r.avg !== null ? 'has' : '') + '" title="' + r.round + '회차 ' + r.date + (r.product ? ' ' + esc(r.product) : '') + '">' + (r.avg !== null ? r.round + '회 ' + f2(r.avg) + ' (' + r.count + '명)' : md(r.date)) + '</i>'; }).join('') + '</span></td></tr>';
       }).join('') + '</tbody></table></div>';
   } else if (A.tab === 'rounds') {
-    var list = held.slice().reverse();
-    h += '<h2>지난 발표 ' + list.length + '회 (최근 순)</h2>';
-    h += list.length ? '<div class="card tscroll"><table><thead><tr><th class="n">회차</th><th>날짜</th><th>조</th><th>제품</th><th class="n">평균</th><th class="n">최저~최고</th><th class="n">평가</th><th>1~5점 분포</th><th>미평가자</th></tr></thead><tbody>' +
+    // 지난 발표 + 아직 날짜가 안 됐지만 미리 점수가 들어온 발표
+    var list = d.rounds.filter(function (r) { return r.state !== 'future' || r.count; }).reverse();
+    h += '<h2>점수가 들어온 발표와 지난 발표 ' + list.length + '회 (최근 순) · 회차 아래에 누가 몇 점 줬는지 나옵니다</h2>';
+    h += list.length ? '<div class="card tscroll"><table><thead><tr><th class="n">회차</th><th>날짜</th><th>조</th><th>제품</th><th class="n">평균</th><th class="n">총점</th><th class="n">평가</th><th>1~5점 분포</th><th>미평가자</th></tr></thead><tbody>' +
       list.map(function (r) {
         var mx = Math.max.apply(null, r.dist.concat([1]));
-        return '<tr><td class="n">' + r.round + '</td><td style="white-space:nowrap">' + ymdK(r.date) + '(' + r.day + ')</td><td style="white-space:nowrap">' + esc(r.teamName) + '</td><td style="white-space:nowrap">' + esc(r.product || '-') + '</td><td class="n">' + f2(r.avg) + '</td><td class="n">' + (r.count ? r.min + '~' + r.max : '-') + '</td><td class="n">' + r.count + '/' + r.eligible + '</td>' +
+        var given = r.given || [];
+        return '<tr class="rrow"><td class="n">' + r.round + '</td><td style="white-space:nowrap">' + ymdK(r.date) + '(' + r.day + ')' + (r.state === 'future' ? '<div class="names">미리 평가</div>' : '') + '</td><td style="white-space:nowrap">' + esc(r.teamName) + '</td><td style="white-space:nowrap">' + esc(r.product || '-') + '</td><td class="n">' + f2(r.avg) + '</td><td class="n">' + r.sum + '</td><td class="n">' + r.count + '/' + r.eligible + '</td>' +
           '<td><span class="dist" title="' + r.dist.map(function (c, i) { return (i + 1) + '점 ' + c + '명'; }).join(', ') + '">' + r.dist.map(function (c) { return '<i style="height:' + Math.max(4, c / mx * 100) + '%;' + (c ? '' : 'opacity:.2') + '"></i>'; }).join('') + '</span></td>' +
-          '<td class="names">' + (r.missing.length ? esc(r.missing.join(', ')) : '모두 평가') + '</td></tr>';
+          '<td class="names">' + (r.state === 'future' ? '-' : (r.missing.length ? esc(r.missing.join(', ')) : '모두 평가')) + '</td></tr>' +
+          '<tr class="given"><td></td><td colspan="8">' + (given.length ? '<span class="mini">' + given.map(function (g) {
+            return '<i class="has" title="' + esc(g.updated) + '">' + esc(g.name) + ' <b>' + g.score + '</b></i>';
+          }).join('') + '</span>' : '<span class="names">아직 점수 없음</span>') + '</td></tr>';
       }).join('') + '</tbody></table></div>' : '<div class="empty">아직 지난 발표가 없습니다. 첫 발표: ' + (next ? ymdK(next.date) : '') + '</div>';
   } else if (A.tab === 'people') {
     var ppl = d.evaluators.slice().sort(function (a, b) { return (a.done / (a.need || 1)) - (b.done / (b.need || 1)) || (a.name < b.name ? -1 : 1); });
