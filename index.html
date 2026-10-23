@@ -441,10 +441,10 @@ function renderAdmin() {
 
   if (A.tab === 'teams') {
     var teams = d.teams.slice().sort(function (a, b) { return (a.rank || 99) - (b.rank || 99) || a.team - b.team; });
-    h += '<h2>평균 = 각 회차 평균점의 평균 · 총점 = 받은 점수를 모두 더한 값</h2><div class="card tscroll"><table><thead><tr><th>순위</th><th>조</th><th class="n">평균</th><th class="n">총점</th><th class="n">점수 수</th><th class="n">발표</th><th>회차별 평균</th></tr></thead><tbody>' +
+    h += '<h2>한 조의 발표 6회를 모두 합친 값 · 평균 = 각 회차 평균점의 평균 · 총점 = 받은 점수를 모두 더한 값</h2><div class="card tscroll"><table><thead><tr><th>순위</th><th>조</th><th class="n">평균</th><th class="n">총점</th><th class="n" title="6회 발표에 들어온 점수를 모두 센 수">평가 건수</th><th class="n" title="한 사람이 여러 회차를 평가해도 1명으로 셈">평가한 사람</th><th class="n">발표</th><th>회차별 평균 (평가 인원)</th></tr></thead><tbody>' +
       teams.map(function (t) {
-        return '<tr class="' + (t.rank === 1 ? 'lead' : '') + '"><td>' + (t.rank || '-') + '</td><td style="white-space:nowrap">' + esc(t.teamName) + '</td><td class="n">' + f2(t.avg) + '</td><td class="n">' + t.sum + '</td><td class="n">' + t.count + '</td><td class="n">' + t.held + '/' + t.planned + '</td><td><span class="mini">' +
-          t.rounds.map(function (r) { return '<i class="' + (r.avg !== null ? 'has' : '') + '" title="' + r.round + '회차 ' + r.date + (r.product ? ' ' + esc(r.product) : '') + '">' + (r.avg !== null ? f2(r.avg) : md(r.date)) + '</i>'; }).join('') + '</span></td></tr>';
+        return '<tr class="' + (t.rank === 1 ? 'lead' : '') + '"><td>' + (t.rank || '-') + '</td><td style="white-space:nowrap">' + esc(t.teamName) + '</td><td class="n">' + f2(t.avg) + '</td><td class="n">' + t.sum + '</td><td class="n">' + t.count + '건</td><td class="n">' + (t.people || 0) + '명</td><td class="n">' + t.held + '/' + t.planned + '</td><td><span class="mini">' +
+          t.rounds.map(function (r) { return '<i class="' + (r.avg !== null ? 'has' : '') + '" title="' + r.round + '회차 ' + r.date + (r.product ? ' ' + esc(r.product) : '') + '">' + (r.avg !== null ? r.round + '회 ' + f2(r.avg) + ' (' + r.count + '명)' : md(r.date)) + '</i>'; }).join('') + '</span></td></tr>';
       }).join('') + '</tbody></table></div>';
   } else if (A.tab === 'rounds') {
     var list = held.slice().reverse();
