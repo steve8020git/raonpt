@@ -143,7 +143,7 @@ tr.given .mini b { color: var(--accent); margin-left: 2px; }
 <script>
 var BOOT = {"title":"발표 평가","api":"https://script.google.com/macros/s/AKfycbytxPrdskjwU2a53eenkWw9eHhnU5ar9GF4eFh5M6f-KcYupU5DmT8IeUuZt3pfRaap/exec"};
 // 화면 버전: Code.js 의 PAGE_VER 와 같아야 한다. 다르면(브라우저가 옛 화면을 기억) 한 번 새로 불러온다.
-var PAGE_VER = '2026-10-23b';
+var PAGE_VER = '2026-10-23c';
 var LABELS = ['', '매우 미흡', '미흡', '보통', '우수', '매우 우수'];
 var app = document.getElementById('app');
 var S = { names: [], me: null, cred: null, tab: 'score', open: null, showAll: false, draft: {} };
@@ -479,11 +479,21 @@ function renderAdmin() {
           }).join('') + '</span>' : '<span class="names">아직 점수 없음</span>') + '</td></tr>';
       }).join('') + '</tbody></table></div>' : '<div class="empty">아직 지난 발표가 없습니다. 첫 발표: ' + (next ? ymdK(next.date) : '') + '</div>';
   } else if (A.tab === 'people') {
-    var ppl = d.evaluators.slice().sort(function (a, b) { return (a.done / (a.need || 1)) - (b.done / (b.need || 1)) || (a.name < b.name ? -1 : 1); });
-    h += '<h2>평가 참여 (적게 한 사람부터)</h2><div class="card tscroll"><table><thead><tr><th>이름</th><th>조</th><th class="n">평가</th><th>빠진 회차</th></tr></thead><tbody>' +
+    // 지난 발표를 많이 빠뜨린 사람부터, 같으면 점수를 많이 넣은 사람부터
+    var ppl = d.evaluators.slice().sort(function (a, b) {
+      return (b.need - b.done) - (a.need - a.done) || (b.total || 0) - (a.total || 0) || a.name.localeCompare(b.name, 'ko');
+    });
+    var heldN = d.rounds.filter(function (r) { return r.state !== 'future'; }).length;
+    h += '<h2>사람마다 몇 번 평가했는지 · ' + (heldN ? '지난 발표 ' + heldN + '회 중 빠진 회차도 보여 줍니다' : '아직 지난 발표가 없어 "빠진 회차"는 첫 발표(11월 3일) 뒤부터 나옵니다') + '</h2>' +
+      '<div class="card tscroll"><table><thead><tr><th>이름</th><th>조</th><th class="n">점수 넣은 발표</th><th>넣은 회차</th><th class="n">지난 발표 참여</th><th>빠진 회차</th></tr></thead><tbody>' +
       ppl.map(function (p) {
         var w = p.need ? Math.round(p.done / p.need * 60) : 0;
-        return '<tr><td>' + esc(p.name) + '</td><td>' + esc(p.teamName || '-') + '</td><td class="n"><span class="bar-in" style="width:' + w + 'px"></span> ' + p.done + '/' + p.need + '</td><td class="names">' + (p.missing.length ? p.missing.map(function (n) { return n + '회'; }).join(', ') : (p.need ? '없음' : '-')) + '</td></tr>';
+        var rs = (p.rounds || []).map(function (n) { return n + '회'; }).join(', ');
+        return '<tr><td style="white-space:nowrap">' + esc(p.name) + '</td><td style="white-space:nowrap">' + esc(p.teamName || '-') + '</td>' +
+          '<td class="n">' + (p.total || 0) + '회' + (p.early ? '<div class="names">미리 ' + p.early + '회</div>' : '') + '</td>' +
+          '<td class="names">' + (rs || '-') + '</td>' +
+          '<td class="n">' + (p.need ? '<span class="bar-in" style="width:' + w + 'px"></span> ' + p.done + '/' + p.need : '-') + '</td>' +
+          '<td class="names">' + (p.missing.length ? p.missing.map(function (n) { return n + '회'; }).join(', ') : (p.need ? '없음' : '-')) + '</td></tr>';
       }).join('') + '</tbody></table></div>';
   } else if (A.tab === 'member') {
     h += memberHtml();
